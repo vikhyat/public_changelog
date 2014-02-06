@@ -1,9 +1,15 @@
 require 'sinatra'
 require 'octokit'
 require 'digest/md5'
+require 'faraday/http_cache'
 
-require 'yaml'
+stack = Faraday::RackBuilder.new do |builder|
+  builder.use Faraday::HttpCache
+  builder.use Octokit::Response::RaiseError
+  builder.adapter Faraday.default_adapter
+end
 
+Octokit.middleware = stack
 Octokit.configure do |c|
   c.access_token = ENV['GH_TOKEN']
 end
